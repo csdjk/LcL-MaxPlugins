@@ -1,0 +1,15 @@
+name "LcL_Tools"  
+version 1.0
+
+-- 安装时一次性操作 - 移动图标文件到用户图标目录
+move "icon\button_*.bmp" to "$usericons"
+treeMove "core" to "$max\\Plugins\\LcL_Tools"
+treeMove "icon" to "$max\\Plugins\\LcL_Tools"
+treeMove "ui" to "$max\\Plugins\\LcL_Tools"  
+drop "Main.ms"
+move "Main.ms" to "$max\\Plugins\\LcL_Tools"
+
+-- 只在安装时运行一次
+run "$max\\Plugins\\LcL_Tools\\Main.ms"
+
+clear temp
