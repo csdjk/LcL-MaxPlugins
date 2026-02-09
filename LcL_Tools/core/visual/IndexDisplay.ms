@@ -8,73 +8,71 @@ global LcL_FaceIndexShow = false
 global LcL_lastviewport
 global LcL_callbacks = 0
 
+-- 颜色配置变量
+global LcL_VertexIndexColor = [231,217,55]   -- 默认黄色
+global LcL_FaceIndexColor = [0,255,255]      -- 亮青色 - 在红色背景下更明显
+
 -- 通用屏幕更新函数
 fn LcL_redrawscr = gw.updatescreen()
 
--- 顶点索引显示函数
+-- 顶点索引显示函数 - 显示选中的顶点索引
 fn LcL_VertexShow = (
-    try (
-        if viewport.activeViewport != LcL_lastviewport do (
-            completeredraw()
-            LcL_lastViewport = viewport.activeViewport 
-        )
-        if (selection.count == 1) and ((classof $.baseobject == Editable_Mesh) or (classof $.baseobject == Editable_Poly)) then
-        (
-            gw.setTransform (matrix3 1)
-            if (classof $ == Editable_Mesh) then
-                for gw_i in (getvertselection $) do
-                    gw.wtext ((gw.wTransPoint (getvert $ gw_i)) + [5,-5,0]) (gw_i as string) color:[231,217,55]
-            else
-                for gw_i in (polyop.getvertselection $.baseobject) do
-                    gw.wtext ((gw.wTransPoint (polyop.getvert $ gw_i)) + [5,-5,0]) (gw_i as string) color:[231,217,55]
-            gw.enlargeupdaterect #whole
-        )
+    if viewport.activeViewport != LcL_lastviewport do (
+        completeredraw()
+        LcL_lastViewport = viewport.activeViewport 
     )
-    catch()
+    if (selection.count == 1) and ((classof $.baseobject == Editable_Mesh) or (classof $.baseobject == Editable_Poly)) then
+    (
+        gw.setTransform (matrix3 1)
+        if (classof $ == Editable_Mesh) then
+            for gw_i in (getvertselection $) do
+                gw.wtext ((gw.wTransPoint (getvert $ gw_i)) + [5,-5,0]) (gw_i as string) color:LcL_VertexIndexColor
+        else
+            for gw_i in (polyop.getvertselection $.baseobject) do
+                gw.wtext ((gw.wTransPoint (polyop.getvert $ gw_i)) + [5,-5,0]) (gw_i as string) color:LcL_VertexIndexColor
+        gw.enlargeupdaterect #whole
+    )
 )
 
--- 面索引显示函数
+-- 面索引显示函数 - 显示选中的面索引
 fn LcL_FaceShow = (
-    try (
-        if viewport.activeViewport != LcL_lastviewport do (
-            completeredraw()
-            LcL_lastViewport = viewport.activeViewport 
-        )
-        if (selection.count == 1) and ((classof $.baseobject == Editable_Mesh) or (classof $.baseobject == Editable_Poly)) then
-        (
-            gw.setTransform (matrix3 1)
-            if (classof $ == Editable_Mesh) then
-                for gw_i in (getfaceselection $) do (
-                    local face_i = meshop.getfacecenter $ gw_i
-                    gw.wtext ((gw.wtransPoint face_i)+[0,0,100]) (gw_i as string) color:[255,255,255]
-                )
-            else (
-                for gw_i in (polyop.getfaceselection $.baseobject) do (
-                    local face_i = polyop.getfacecenter $ gw_i
-                    gw.wtext ((gw.wtransPoint face_i)+[0,0,100]) (gw_i as string) color:[255,255,255]
-                )
-            )               
-            gw.enlargeupdaterect #whole
-        )
+    if viewport.activeViewport != LcL_lastviewport do (
+        completeredraw()
+        LcL_lastViewport = viewport.activeViewport 
     )
-    catch()
+    if (selection.count == 1) and ((classof $.baseobject == Editable_Mesh) or (classof $.baseobject == Editable_Poly)) then
+    (
+        gw.setTransform (matrix3 1)
+        if (classof $ == Editable_Mesh) then
+            for gw_i in (getfaceselection $) do (
+                local face_i = meshop.getfacecenter $ gw_i
+                gw.wtext ((gw.wTransPoint face_i)+[0,0,100]) (gw_i as string) color:LcL_FaceIndexColor
+            )
+        else (
+            for gw_i in (polyop.getfaceselection $.baseobject) do (
+                local face_i = polyop.getfacecenter $ gw_i
+                gw.wtext ((gw.wTransPoint face_i)+[0,0,100]) (gw_i as string) color:LcL_FaceIndexColor
+            )
+        )               
+        gw.enlargeupdaterect #whole
+    )
 )
 
 -- 检查是否在顶点编辑模式
 fn LcL_CheckVertexMode = (
     if selection.count == 0 then (
-        messagebox "请先选择一个Editable Mesh或Editable Poly对象" title:"提示"
+        format "⚠️ 请先选择一个Editable Mesh或Editable Poly对象\n"
         return false
     )
     
     local obj = selection[1]
     if not ((classof obj.baseobject == Editable_Mesh) or (classof obj.baseobject == Editable_Poly)) then (
-        messagebox "请选择Editable Mesh或Editable Poly对象" title:"提示"
+        format "⚠️ 请选择Editable Mesh或Editable Poly对象\n"
         return false
     )
     
     if subobjectLevel != 1 then (
-        messagebox "请先进入顶点编辑模式（Vertex模式）" title:"提示"
+        format "⚠️ 请先进入顶点编辑模式（Vertex模式）\n"
         return false
     )
     
@@ -84,20 +82,20 @@ fn LcL_CheckVertexMode = (
 -- 检查是否在面编辑模式
 fn LcL_CheckFaceMode = (
     if selection.count == 0 then (
-        messagebox "请先选择一个Editable Mesh或Editable Poly对象" title:"提示"
+        format "⚠️ 请先选择一个Editable Mesh或Editable Poly对象\n"
         return false
     )
     
     local obj = selection[1]
     if not ((classof obj.baseobject == Editable_Mesh) or (classof obj.baseobject == Editable_Poly)) then (
-        messagebox "请选择Editable Mesh或Editable Poly对象" title:"提示"
+        format "⚠️ 请选择Editable Mesh或Editable Poly对象\n"
         return false
     )
     
     local faceLevel = if (classof obj.baseobject == Editable_Mesh) then 3 else 4
     if subobjectLevel != faceLevel then (
         local modeName = if (classof obj.baseobject == Editable_Mesh) then "Face模式" else "Polygon模式"
-        messagebox ("请先进入面编辑模式（" + modeName + "）") title:"提示"
+        format "⚠️ 请先进入面编辑模式（%）\n" modeName
         return false
     )
     
@@ -133,7 +131,7 @@ fn LcL_DisableVertexIndex = (
 -- 启用面索引显示
 fn LcL_EnableFaceIndex = (
     if not LcL_CheckFaceMode() then return false
-    
+        
     if not LcL_FaceIndexShow then (
         LcL_callbacks += 1
         registerRedrawviewscallback LcL_FaceShow
